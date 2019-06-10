@@ -1,6 +1,6 @@
 {
     "name": "alamb/auth-service",
-    "type": "project",
+    "type": "library",
     "license": "MIT",
     "authors": [
         {
