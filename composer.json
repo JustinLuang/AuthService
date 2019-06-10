@@ -9,10 +9,15 @@
         }
     ],
     "minimum-stability": "dev",
-    "require": {},
+    "require": {
+      "php": ">=7.1.3",
+      "guzzlehttp/guzzle": "^6.3",
+      "illuminate/redis": "^5.8",
+      "predis/predis": "^1.1"
+    },
 	"autoload":{
 	"psr-4":{
-		"Alamb\\AuthService":"src/Alamb/AuthService"
+		"Alamb\\AuthService":"src\\Alamb\\AuthService"
 		}
 	}
 }
