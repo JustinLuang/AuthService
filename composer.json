@@ -11,8 +11,8 @@
     "minimum-stability": "dev",
     "require": {
       "php": ">=7.1.3",
-      "guzzlehttp/guzzle": "^6.3",
-      "illuminate/redis": "^5.8",
+      "guzzlehttp/guzzle": "6.3",
+      "illuminate/redis": "5.5.*",
       "predis/predis": "^1.1"
     },
 	"autoload":{
