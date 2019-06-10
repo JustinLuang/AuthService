@@ -5,6 +5,7 @@ namespace Alamb\AuthService;
 
 use Carbon\Carbon;
 use \GuzzleHttp\Client as Client;
+use Illuminate\Config\Repository;
 
 class AuthService
 {

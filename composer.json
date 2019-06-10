@@ -17,7 +17,7 @@
     },
 	"autoload":{
 	"psr-4":{
-		"Alamb\\AuthService\\":"/src/Alamb/AuthService"
+		"Alamb\\AuthService\\":"/src/"
 		}
 	}
 }
