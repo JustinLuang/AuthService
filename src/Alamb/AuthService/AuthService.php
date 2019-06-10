@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\Services;
+namespace Alamb\AuthService;
 
 use Carbon\Carbon;
 use \GuzzleHttp\Client as Client;
