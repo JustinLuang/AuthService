@@ -1,0 +1,18 @@
+{
+    "name": "alamb/auth-service",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "alamb",
+            "email": "justin_change@outlook.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {},
+	"autoload":{
+	"psr-4":{
+		"Alamb\\AuthService":"src/Alamb/AuthService"
+		}
+	}
+}
