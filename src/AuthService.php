@@ -15,6 +15,8 @@ class AuthService
       protected $config;
       protected $api_list;
       protected $service_tickets=null;
+      public $service_id=null;
+      public $expire=1500;
 
 
     /**
@@ -25,6 +27,7 @@ class AuthService
       {
           $this->config=\config('service.service_config');
           $this->api_list=\config('service.api_list');
+          $this->service_id = $this->config['service_id'];
       }
 
     /**
@@ -209,16 +212,18 @@ class AuthService
 
         $client =new \Predis\Client();
 
-        if(!$client->exists('app_token')){
+        if(!$client->exists('app_token_'.$this->service_id)){
             return $this->getTickets();
         }else{
-            if (!$client->exists('app_expire')) {
-                $this->refreshTicket($client->get('app_refresh_token'));
+            if (!$client->exists('app_expire_'.$this->service_id)) {
+                $this->refreshTicket($client->get('app_refresh_token_'.$this->service_id));
             }
         }
 
-        return $client->get('app_token');
+        return $client->get('app_token_'.$this->service_id);
     }
+
+
 
 
 
@@ -252,14 +257,14 @@ class AuthService
         if(!empty($service_tickets)) {
             $client = new \Predis\Client();
 
-            $client->set("app_token", $service_tickets->token);
-            $client->expire("app_token", 100);
+            $client->set("app_token_".$this->service_id, $service_tickets->token);
+            $client->expire("app_token_".$this->service_id, $this->expire);
 
-            $client->set("app_refresh_token", $service_tickets->refresh_token);
-            $client->expire("app_refresh_token", 100);
+            $client->set("app_refresh_token_".$this->service_id, $service_tickets->refresh_token);
+            $client->expire("app_refresh_token_".$this->service_id, $this->expire);
 
-            $client->set("app_expire", $service_tickets->expire);
-            $client->expire("app_expire", 10);
+            $client->set("app_expire_".$this->service_id, $service_tickets->expire);
+            $client->expire("app_expire_".$this->service_id, $this->expire-60);
         }
     }
 
@@ -272,13 +277,13 @@ class AuthService
     {
         if(!empty($refresh_tickets)){
             $client =new \Predis\Client();
-            $client->expire("app_token", 100);
+            $client->expire("app_token_".$this->service_id, $this->expire);
 
-            $client->set("app_refresh_token", $refresh_tickets->refresh_token);
-            $client->expire("app_refresh_token", 100);
+            $client->set("app_refresh_token_".$this->service_id, $refresh_tickets->refresh_token);
+            $client->expire("app_refresh_token_".$this->service_id, $this->expire);
 
-            $client->set("app_expire", $refresh_tickets->expire);
-            $client->expire("app_expire", 10);
+            $client->set("app_expire_".$this->service_id, $refresh_tickets->expire);
+            $client->expire("app_expire_".$this->service_id, $this->expire-60);
         }
     }
 
