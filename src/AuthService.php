@@ -243,7 +243,10 @@ class AuthService
 
         $contents = json_decode($response->getBody()->getContents());
 
-        $this->refreshCacheTickets($contents->data);
+        if ($contents->code == 200) {
+            $this->refreshCacheTickets($contents->data);
+        }
+
 
     }
 
