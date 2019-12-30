@@ -6,29 +6,30 @@ namespace Alamb\AuthService;
 use Carbon\Carbon;
 use \GuzzleHttp\Client as Client;
 use Illuminate\Config\Repository;
+use Illuminate\Support\Facades\Redis;
 
 class AuthService
 {
 
-      static private $_instance = null;
+    static private $_instance = null;
 
-      protected $config;
-      protected $api_list;
-      protected $service_tickets=null;
-      public $service_id=null;
-      public $expire=1500;
+    protected $config;
+    protected $api_list;
+    protected $service_tickets=null;
+    public $service_id=null;
+    public $expire=1500;
 
 
     /**
      * 私有化构造函数
      * AuthService constructor.
      */
-      private function __construct()
-      {
-          $this->config=\config('service.service_config');
-          $this->api_list=\config('service.api_list');
-          $this->service_id = $this->config['service_id'];
-      }
+    private function __construct()
+    {
+        $this->config=\config('service.service_config');
+        $this->api_list=\config('service.api_list');
+        $this->service_id = $this->config['service_id'];
+    }
 
     /**
      * 单例模型，自己实例化自己
@@ -56,7 +57,7 @@ class AuthService
         $openssl_private_key = openssl_get_privatekey($privateKey);
 
         openssl_sign($content, $signature, $openssl_private_key, OPENSSL_ALGO_MD5);
-       // @openssl_private_encrypt($content, $signature, $openssl_private_key, OPENSSL_PKCS1_PADDING);
+        // @openssl_private_encrypt($content, $signature, $openssl_private_key, OPENSSL_PKCS1_PADDING);
         @openssl_free_key($openssl_private_key);
         $sign = base64_encode($signature);
 
@@ -100,7 +101,7 @@ class AuthService
         $result = @openssl_verify($content,base64_decode($sign), $openssl_public_key,OPENSSL_ALGO_MD5);
 
 
-      // $result = openssl_public_decrypt(base64_decode($sign), $decrypted, $openssl_public_key, OPENSSL_PKCS1_PADDING);
+        // $result = openssl_public_decrypt(base64_decode($sign), $decrypted, $openssl_public_key, OPENSSL_PKCS1_PADDING);
         //释放资源
         @openssl_free_key($openssl_public_key);
         return $result;
@@ -210,17 +211,17 @@ class AuthService
     public function checkTickets()
     {
 
-        $client =new \Predis\Client();
+        // $client = new \Redis();
 
-        if(!$client->exists('app_token_'.$this->service_id)){
+        if(!Redis::get('app_token_'.$this->service_id)){
             return $this->getTickets();
         }else{
-            if (!$client->exists('app_expire_'.$this->service_id)) {
-                $this->refreshTicket($client->get('app_refresh_token_'.$this->service_id));
+            if (!Redis::get('app_expire_'.$this->service_id)) {
+                $this->refreshTicket(Redis::get('app_refresh_token_'.$this->service_id));
             }
         }
 
-        return $client->get('app_token_'.$this->service_id);
+        return Redis::get('app_token_'.$this->service_id);
     }
 
 
@@ -258,16 +259,16 @@ class AuthService
     public function cacheTickets($service_tickets=[])
     {
         if(!empty($service_tickets)) {
-            $client = new \Predis\Client();
+            //    $client = new \Redis();
 
-            $client->set("app_token_".$this->service_id, $service_tickets->token);
-            $client->expire("app_token_".$this->service_id, $this->expire);
+            Redis::setex("app_token_".$this->service_id,$this->expire, $service_tickets->token);
+            // $client->expire("app_token_".$this->service_id, );
 
-            $client->set("app_refresh_token_".$this->service_id, $service_tickets->refresh_token);
-            $client->expire("app_refresh_token_".$this->service_id, $this->expire);
+            Redis::setex("app_refresh_token_".$this->service_id,$this->expire, $service_tickets->refresh_token);
+            //   $client->expire("app_refresh_token_".$this->service_id, );
 
-            $client->set("app_expire_".$this->service_id, $service_tickets->expire);
-            $client->expire("app_expire_".$this->service_id, $this->expire-60);
+            Redis::setex("app_expire_".$this->service_id,$this->expire-60, $service_tickets->expire);
+            //   $client->expire("app_expire_".$this->service_id, $this->expire-60);
         }
     }
 
@@ -279,14 +280,14 @@ class AuthService
     public function refreshCacheTickets($refresh_tickets=[])
     {
         if(!empty($refresh_tickets)){
-            $client =new \Predis\Client();
-            $client->expire("app_token_".$this->service_id, $this->expire);
+           // $client = new \Redis();
+            Redis::expire("app_token_".$this->service_id, $this->expire);
 
-            $client->set("app_refresh_token_".$this->service_id, $refresh_tickets->refresh_token);
-            $client->expire("app_refresh_token_".$this->service_id, $this->expire);
+            Redis::set("app_refresh_token_".$this->service_id, $refresh_tickets->refresh_token);
+            Redis::expire("app_refresh_token_".$this->service_id, $this->expire);
 
-            $client->set("app_expire_".$this->service_id, $refresh_tickets->expire);
-            $client->expire("app_expire_".$this->service_id, $this->expire-60);
+            Redis::set("app_expire_".$this->service_id, $refresh_tickets->expire);
+            Redis::expire("app_expire_".$this->service_id, $this->expire-60);
         }
     }
 
